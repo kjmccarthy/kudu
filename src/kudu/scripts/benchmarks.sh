@@ -35,6 +35,9 @@ set -o pipefail
 MODE_JENKINS="jenkins"
 MODE_LOCAL="local"
 
+# In Jenkins mode, get last 10 weeks of stats stored in the database.
+STATS_DAYS_TO_FETCH=70
+
 LOCAL_STATS_BASE="local-stats"
 
 NUM_MT_TABLET_TESTS=5
@@ -121,8 +124,7 @@ record_result() {
 load_stats() {
   local TEST_NAME="$1"
   if [ "$BENCHMARK_MODE" = "$MODE_JENKINS" ]; then
-    # Get last 4 weeks of stats
-    python get-job-stats-from-mysql.py $TEST_NAME 28
+    python get-job-stats-from-mysql.py $TEST_NAME $STATS_DAYS_TO_FETCH
   else
     # Convert MySQL wildcards to shell wildcards.
     local TEST_NAME=$(echo $TEST_NAME | perl -pe 's/%/*/g')
@@ -330,7 +332,7 @@ run_benchmarks() {
   done
 
   # Run GetTableLocationsBenchmark, with and without cache.
-  for capacity_mb in 0 32 do ;
+  for capacity_mb in 0 32 ; do
     for i in $(seq 1 $NUM_SAMPLES) ; do
       KUDU_ALLOW_SLOW_TESTS=true ./build/latest/bin/table_locations-itest \
         --gtest_filter=TableLocationsTest.GetTableLocationsBenchmark \
@@ -342,7 +344,7 @@ run_benchmarks() {
   done
 
   # Run GetTableLocationsBenchmarkFunctionCall, with and without cache.
-  for capacity_mb in 0 32 do ;
+  for capacity_mb in 0 32 ; do
     for i in $(seq 1 $NUM_SAMPLES) ; do
       KUDU_ALLOW_SLOW_TESTS=true ./build/latest/bin/table_locations-itest \
         --gtest_filter=TableLocationsTest.GetTableLocationsBenchmarkFunctionCall \

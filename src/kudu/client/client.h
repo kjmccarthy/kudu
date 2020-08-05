@@ -67,6 +67,7 @@ class KuduTable;
 } // namespace client
 
 namespace transactions {
+class CoordinatorRpc;
 class TxnSystemClient;
 } // namespace transactions
 
@@ -622,6 +623,8 @@ class KUDU_EXPORT KuduClient : public sp::enable_shared_from_this<KuduClient> {
   friend class internal::WriteRpc;
   friend class kudu::AuthzTokenTest;
   friend class kudu::SecurityUnknownTskTest;
+  friend class transactions::CoordinatorRpc;
+  friend class transactions::TxnSystemClient;
   friend class tools::LeaderMasterProxy;
   friend class tools::RemoteKsckCluster;
 
@@ -2425,6 +2428,9 @@ class KUDU_EXPORT KuduScanner {
 
   /// @return Schema of the projection being scanned.
   KuduSchema GetProjectionSchema() const;
+
+  /// @return KuduTable being scanned.
+  sp::shared_ptr<KuduTable> GetKuduTable();
 
   /// @name Advanced/Unstable API
   //
